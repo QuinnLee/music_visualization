@@ -1,0 +1,22 @@
+.axis path,
+.axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.y.axis path {
+    display: none;
+}
+
+.y.axis line {
+  stroke: #777;
+  stroke-dasharray: 1,10;
+}
+
+.axis text {
+  font-size: 12px;
+}
+.legend text {
+  font-size: 12px;
+}
