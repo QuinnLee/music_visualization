@@ -1,17 +1,74 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
   <link rel="stylesheet" href="css/style.css"/>
-
-<!--
-   -  <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'>
-   -  <link href='http://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
-   -
-   -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
   <body>
-    <h1> Asturias </h1>
-    <div id='note-scatter-plot'></div>
+    <div class="container">
+      <div>
+        <div class='row'>
+          <h1> my guitar</h1>
+        </div>
+        <div class='row'>
+          <p>
+            Off all the instruments in the world the classical guitar, is my favorite.  I used to listen to the masters like
+            <a href='http://en.wikipedia.org/wiki/John_Williams_%28guitarist%29'> John Willams</a> and
+            <a href='http://en.wikipedia.org/wiki/Andr%C3%A9s_Segovia'> Andrés Segovia</a>.
+          </p>
+          <p>
+            Sheet music is very dense with information.
+            I wanted to visualize my two favorite pieces, <a href='http://en.wikipedia.org/wiki/Asturias_%28Leyenda%29'>Asturias</a> and
+            <a href='http://en.wikipedia.org/wiki/Recuerdos_de_la_Alhambra'>Recuerdos de la Alhambra</a> in a new way.
+          </p>
+          <p>
+            I used musicXML data from <a href='http://musescore.org/'/>Musescore</a> and converted it to JSON.  d3 and crossfilte are used to do the charting
+            and information is from wikipedia.
+          </p>
+        </div>
+        <main class='row'>
+          <div class='col-md-7'>
+            <div class='controls'>
+              <button type="button" class="btn btn-default btn-lg switch">
+                <span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div id='note-scatter-plot'></div>
+          </div>
+          <div class='col-md-5'>
+            <div id='information' class='asturias'>
+              <h2 id='title'></h2>
+              <h3 id='composer'></h3>
+              <div id='video'></div>
+              <p>Performed by:</p>
+              <p id='performer'></p>
+              <div id='textOne' class='info-text'></div>
+              <div class='clearfix'></div>
+              <div id='textTwo' class='info-text'></div>
+              <div id='sheet-music'></div>
+            </div>
+            <div id='information' class='alhambra hidden'>
+              <h2 id='title'></h2>
+              <h3 id='composer'></h3>
+              <div id='video'></div>
+              <p>Performed by:</p>
+              <p id='performer'></p>
+              <div id='textOne' class='info-text'></div>
+              <div class='clearfix'></div>
+              <div id='textTwo' class='info-text'></div>
+              <div id='sheet-music'></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
     <script src="js/d3.min.js"></script>
+    <script src="js/crossfilter.min.js"></script>
     <script src="js/queue.min.js"></script>
+    <script src="js/scatter.js"></script>
     <script src="js/script.js"></script>
   </body>
 </html>

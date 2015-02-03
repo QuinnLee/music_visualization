@@ -1,154 +1,108 @@
-d3.json('/data/notes.json', function(error, json) {
-  var midiDefinition = {
-    "octave": { "1":24, "2":36, "3":48, "4":60, "5": 72, "6":84, "7":96 },
-    "step": { "C":0, "D":2, "E":4, "F":5, "G":7, "A":9, "B":11 }
+var plot;
+var midiDefinition = {
+  "octave": { "1":24, "2":36, "3":48, "4":60, "5": 72, "6":84, "7":96 },
+  "step": { "C":0, "D":2, "E":4, "F":5, "G":7, "A":9, "B":11 }
+}
+
+var score = {};
+var content = {};
+
+var munger = function(datum) {
+  var pitch = datum.pitch;
+  datum.duration = +datum.duration || 0;
+  var midiNumber = datum.rest ? 0 : this.octave[pitch.octave] + this.step[pitch.step];
+  if (!datum.rest) {
+    datum.midiNumber = pitch.alter ? midiNumber + parseInt(pitch.alter) : midiNumber;
+  } else {
+    datum.midiNumber = 'rest';
   }
+  if(!datum.duration){
+    datum.type = 'slur';
+  } else if(datum.rest){
+    datum.type = 'rest';
+  } else if(datum.chord){
+    datum.type = 'chord';
+  } else{
+    datum.type = 'note';
+  }
+};
 
-  json.forEach(function(datum) {
-    var pitch = datum.pitch;
-    datum.duration = +datum.duration || 0;
-    var midiNumber = datum.rest ? 0 : this.octave[pitch.octave] + this.step[pitch.step];
-    datum.midiNumber = datum.alter ? midiNumber + parseInt(datum.alter) : midiNumber;
-  }, midiDefinition);
+queue()
+  .defer(d3.json, '/data/asturias_notes.json')
+  .defer(d3.json, '/data/alhambra_notes.json')
+  .await(function(error, asturias, alhambra) {
+    [asturias, alhambra].forEach(function(notes){
+      notes.forEach(munger, midiDefinition)
+    });
 
-  new NoteScatterPlot('#note-scatter-plot').data(json).render()
+    content.asturias = {
+      "title": "Asturias (Leyenda)",
+      "composer": "Isaac Albéniz",
+      "video": '<iframe width="300" height="200" src="https://www.youtube.com/embed/KNuMm6UfB6c" frameborder="0" allowfullscreen></iframe>',
+      "videoSrc": "https://www.youtube.com/embed/KNuMm6UfB6c",
+      "performer": "John Williams",
+      "sheetMusic": '<a href="http://www.classicalguitarschool.net/music/1095.pdf">Sheet Music</a>',
+      "textOne": "Asturias (Leyenda), named simply Leyenda by its composer, is a musical work written by the Spanish composer Isaac Albéniz.",
+      "textTwo": "It was originally written for the piano and set in the key of G minor. It was first published in Barcelona, by Juan Bta. Pujol & Co., in 1892 as the prelude of a three-movement set entitled Chants d'Espagne"
+    }
+    content.alhambra = {
+      "title": "Recuerdos de la Alhambra",
+      "composer": "Francisco Tárrega",
+      "video": '<iframe width="300" height="200" src="https://www.youtube.com/embed/2rb477dcfXA" frameborder="0" allowfullscreen></iframe>',
+      "videoSrc": "https://www.youtube.com/embed/2rb477dcfXA",
+      "performer": "Francisco Tárrega",
+      "sheetMusic": '<a href="http://imslp.org/wiki/Recuerdos_de_la_Alhambra_%28T%C3%A1rrega,_Francisco%29">Sheet Music</a>',
+      "textOne": "Recuerdos de la Alhambra (Memories of the Alhambra) is a classical guitar piece composed in 1896 in Granada by Spanish composer and guitarist Francisco Tárrega. It uses the classical guitar tremolo technique often performed by advanced players.",
+      "textTwo":""
+    }
+
+    score.asturias = asturias;
+    score.alhambra = alhambra;
+
+    plot = new NoteScatterPlot('#note-scatter-plot').data(score.asturias).render();
+    setInformation('asturias', content.asturias)
+    setInformation('alhambra', content.alhambra)
+    next = 'alhambra'
+  });
+
+d3.select('.switch').on('click', function(){
+  if(next == 'alhambra'){
+    plot.data(score.alhambra).draw();
+    d3.select("#information."+next).classed('hidden', false)
+    d3.select("#information."+next).select('iframe').attr('src', content.alhambra.videoSrc)
+    next = 'asturias'
+    d3.select("#information."+next).classed('hidden', true);
+    d3.select("#information."+next).select('iframe').attr('src', " ")
+  } else {
+    plot.data(score.asturias).draw();
+    d3.select("#information."+next).classed('hidden', false)
+    d3.select("#information."+next).select('iframe').attr('src', content.asturias.videoSrc)
+    next = 'alhambra'
+    d3.select("#information."+next).classed('hidden', true);
+    d3.select("#information."+next).select('iframe').attr('src', " ")
+  }
 });
 
-function NoteScatterPlot(selector) {
-  var _chart = {};
-  var data;
 
-  var margin = {top: 20, right: 20, bottom: 30, left: 40},
-      width = 500 - margin.left - margin.right,
-      height = 500 - margin.top - margin.bottom;
 
-  var notes = { 0:"C", 1:"C#", 2:"D", 3:"D#", 4:"E", 5:"F", 6:"F#", 7:"G", 8:"G#",  9:"A", 10:"A#", 11: "B" };
+function setInformation(piece, data) {
+  var information = d3.select("#information."+piece)
 
-  //create scales
-  // y is note
-  // x is length
-  var yScale = d3.scale
-    .linear()
-    .range([height, 0])
-    .domain([48, 88])
-    .clamp(true);
-
-  var xScale = d3.scale
-    .log(12)
-    .range([0, width])
-    .domain([4, 64])
-    .clamp(true);
-
-  var xAxis = d3.svg.axis()
-    .scale(xScale)
-    .orient('bottom')
-    .tickValues(["0", "6", "8", "9", "12", "24", "48", "96", "144"])
-    .tickFormat(function(d) {
-      return d;
-    });
-
-  var yAxis = d3.svg.axis()
-    .scale(yScale)
-    .orient('right')
-    .tickSize(width + margin.right)
-    .tickValues([53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79, 81, 83])
-    .tickFormat(function(d) {
-      return notes[d % 12];
-    });
-
-   _chart.svg = d3.select(selector).append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-
-  _chart.chart = _chart.svg.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-
-  _chart.data = function(d) {
-    if(arguments.length){
-      data = d; return _chart;
-    }
-    else { return data; }
-  }
-
-  _chart.render = function(d){
-    _chart.chart.append('g')
-      .attr("class", "y axis")
-      .call(yAxis)
-      .call(function (g) {
-        g.selectAll("text")
-        .attr("x", -25)
-        .attr("dy", 2);
-      })
-    .append("text")
-      .attr("class", "label")
-      .attr("transform", "rotate(-90)")
-      .attr("y", -26)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Note");
-
-    _chart.chart.append('g')
-      .attr('class', 'x axis')
-      .attr('transform', 'translate(0,' + height+ ')')
-      .call(xAxis)
-      .append('text')
-        .attr("class", "label")
-        .attr("x", width)
-        .attr("y", -6)
-        .style("text-anchor", "end")
-        .text("Duration");
-
-    var legend = _chart.chart.append('g')
-      .attr("class", "legend")
-      .attr('transform', 'translate(0,375)')
-      .attr("height", 50)
-      .attr("width", 100);
-
-    legend.selectAll('g')
-      .data([{ "color": "black", "name": "rests"},{ "color": "red", "name": "slurs"},{ "color": "steelblue", "name": "notes"}])
-      .enter()
-      .append('g')
-      .each(function(d, i) {
-        var g = d3.select(this);
-        g.append("rect")
-          .attr("x", 20)
-          .attr("y", i*20)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", d.color)
-          .style('opacity', 0.5)
-        g.append("text")
-          .attr("x", 40 )
-          .attr("y", i * 20 + 9)
-          .attr("height",30)
-          .attr("width",100)
-          .text(d.name);
-      });
-
-    _chart.draw();
-
-    return _chart;
-  }
-
- _chart.draw = function() {
-      _chart.chart.selectAll('.dot')
-      .data(data)
-      .enter().append("circle")
-      .attr("r", 4)
-      .attr('class','dot')
-      .style('opacity', '0.1')
-      .style('fill',function(d) {
-        if (d.midiNumber === 0 ) {
-          return 'black';
-        } else if (d.duration == 0) {
-          return 'red'
-        } else {
-          return 'steelblue'
-        }
-      })
-      .attr("cy", function(d) { return yScale(d.midiNumber); })
-      .attr("cx", function(d) { return xScale(d.duration); })
-  };
-
-  return _chart;
+  information.select('#title')
+    .html(data.title);
+  information.select('#composer')
+    .html(data.composer);
+  information.select('#performer')
+    .html(data.performer);
+  information.select('#video')
+    .html(data.video)
+  information.select('#sheet-music')
+    .html(data.sheetMusic)
+  information.select('#textOne')
+    .html(data.textOne)
+  information.select('#textTwo')
+    .html(data.textTwo)
 }
+
+
+

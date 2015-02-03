@@ -6,7 +6,7 @@
 }
 
 .y.axis path {
-    display: none;
+  display: none;
 }
 
 .y.axis line {
@@ -20,3 +20,33 @@
 .legend text {
   font-size: 12px;
 }
+
+#information p {
+  display : inline;
+}
+
+#video iframe{
+  margin: 0  auto;
+  display: block;
+  padding-bottom: 20px;
+}
+
+.info-text {
+  padding: 10px 0;
+}
+
+.controls {
+  margin: 0  auto;
+  display: block;
+  position: absolute;
+  height: 17%;
+}
+
+button {
+  height: 42px;
+}
+
+main {
+  padding-bottom: 50px;
+}
+
