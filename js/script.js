@@ -28,8 +28,8 @@ var munger = function(datum) {
 };
 
 queue()
-  .defer(d3.json, '/data/asturias_notes.json')
-  .defer(d3.json, '/data/alhambra_notes.json')
+  .defer(d3.json, 'data/asturias_notes.json')
+  .defer(d3.json, 'data/alhambra_notes.json')
   .await(function(error, asturias, alhambra) {
     [asturias, alhambra].forEach(function(notes){
       notes.forEach(munger, midiDefinition)
