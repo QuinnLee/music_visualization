@@ -36,9 +36,7 @@
 }
 
 .controls {
-  margin: 0  auto;
-  display: block;
-  position: absolute;
+  float: right;
   height: 17%;
 }
 
