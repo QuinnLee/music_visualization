@@ -1,0 +1,50 @@
+.axis path,
+.axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.y.axis path {
+  display: none;
+}
+
+.y.axis line {
+  stroke: #777;
+  stroke-dasharray: 1,10;
+}
+
+.axis text {
+  font-size: 12px;
+}
+.legend text {
+  font-size: 12px;
+}
+
+#information p {
+  display : inline;
+}
+
+#video iframe{
+  margin: 0  auto;
+  display: block;
+  padding-bottom: 20px;
+}
+
+.info-text {
+  padding: 10px 0;
+}
+
+.controls {
+  float: right;
+  height: 17%;
+}
+
+button {
+  height: 42px;
+}
+
+main {
+  padding-bottom: 50px;
+}
+
